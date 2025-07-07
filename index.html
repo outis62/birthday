@@ -7,22 +7,23 @@
     <title>Joyeux Anniversaire !</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background:
-                linear-gradient(45deg, rgba(255, 107, 107, 0.8), rgba(78, 205, 196, 0.8), rgba(69, 183, 209, 0.8), rgba(150, 206, 180, 0.8)),
-                url('img.jpg');
-            background-size: 400% 400%, cover;
-            background-position: 0% 50%, center;
-            background-attachment: fixed;
-            animation: gradientShift 8s ease infinite;
-            font-family: 'Arial', sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+    margin: 0;
+    padding: 0;
+    background:
+        linear-gradient(45deg, rgba(255, 107, 107, 0.8), rgba(78, 205, 196, 0.8), rgba(69, 183, 209, 0.8), rgba(150, 206, 180, 0.8)),
+        url('dao-img.jpg');
+    background-size: 400% 400%, contain;
+    background-position: 0% 50%, center;
+    background-attachment: fixed;
+    animation: gradientShift 8s ease infinite;
+    font-family: 'Arial', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
 
         @keyframes gradientShift {
             0% {
@@ -247,7 +248,6 @@
     </div>
 
     <script>
-        // Générer des confettis
         function createConfetti() {
             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
             for (let i = 0; i < 50; i++) {
