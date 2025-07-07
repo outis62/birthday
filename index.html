@@ -6,24 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Joyeux Anniversaire !</title>
     <style>
-        body {
-    margin: 0;
-    padding: 0;
-    background:
-        linear-gradient(45deg, rgba(255, 107, 107, 0.8), rgba(78, 205, 196, 0.8), rgba(69, 183, 209, 0.8), rgba(150, 206, 180, 0.8)),
-        url('dao-img.jpg');
-    background-size: 400% 400%, contain;
-    background-position: 0% 50%, center;
-    background-attachment: fixed;
-    animation: gradientShift 8s ease infinite;
-    font-family: 'Arial', sans-serif;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
+        #birthday {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
 
+        body {
+            margin: 0;
+            padding: 0;
+            background:
+                linear-gradient(45deg, rgba(255, 107, 107, 0.8), rgba(78, 205, 196, 0.8), rgba(69, 183, 209, 0.8), rgba(150, 206, 180, 0.8)),
+                url('img.jpg');
+            background-size: 400% 400%, cover;
+            background-position: 0% 50%, center;
+            background-attachment: fixed;
+            animation: gradientShift 8s ease infinite;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
         @keyframes gradientShift {
             0% {
@@ -43,6 +52,46 @@
             text-align: center;
             color: white;
             z-index: 10;
+        }
+
+        .photo-container {
+            position: relative;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .birthday-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: photoFloat 3s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+
+        .birthday-photo:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes photoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .photo-frame {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 4s ease infinite;
+            z-index: -1;
         }
 
         .birthday-text {
@@ -201,7 +250,7 @@
         }
 
         .button {
-            background: linear-gradient(45deg, #10ddcc, #0fb6ab);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             color: white;
             border: none;
             padding: 15px 30px;
@@ -218,12 +267,13 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
         .name {
-    color: #ff6b6b; 
-    font-weight: bold;
-    font-size: 2rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    color: #ff6b6b;               
+    font-size: 2rem;            
+    font-weight: bold;             
+    font-family: 'Segoe UI', sans-serif;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    animation: fadeIn 2s ease-in-out;
 }
-
 
         @media (max-width: 768px) {
             .birthday-text {
@@ -246,41 +296,182 @@
     <div class="balloon"></div>
     <div class="balloon"></div>
 
+    <canvas id="birthday"></canvas>
+    
     <div class="container">
+        <div class="photo-container">
+            <div class="photo-frame"></div>
+            <img src="dao-img.jpg" alt="Daouda ZABRE" class="birthday-photo">
+        </div>
         <div class="birthday-text">🎉 HAPPY BIRTHDAY ! 🎂</div>
         <div class="code-message" id="codeMessage">
             Joyeux anniversaire, 🎈 à <span class="name">Daouda ZABRE</span>
         </div>
-        <button class="button" onclick="showMessage()">Clique 🎂</button>
+        <button class="button" onclick="showMessage()">Clique 🎉</button>
     </div>
 
     <script>
-        function createConfetti() {
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.animationDelay = Math.random() * 3 + 's';
-                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                document.body.appendChild(confetti);
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
+        // helper functions
+        const PI2 = Math.PI * 2
+        const random = (min, max) => Math.random() * (max - min + 1) + min | 0
+        const timestamp = _ => new Date().getTime()
+
+        // container
+        class Birthday {
+            constructor() {
+                this.resize()
+                // create a lovely place to store the firework
+                this.fireworks = []
+                this.counter = 0
+            }
+
+            resize() {
+                this.width = canvas.width = window.innerWidth
+                let center = this.width / 2 | 0
+                this.spawnA = center - center / 4 | 0
+                this.spawnB = center + center / 4 | 0
+
+                this.height = canvas.height = window.innerHeight
+                this.spawnC = this.height * .1
+                this.spawnD = this.height * .5
+            }
+
+            onClick(evt) {
+                let x = evt.clientX || evt.touches && evt.touches[0].pageX
+                let y = evt.clientY || evt.touches && evt.touches[0].pageY
+
+                let count = random(3, 5)
+                for (let i = 0; i < count; i++) this.fireworks.push(new Firework(
+                    random(this.spawnA, this.spawnB),
+                    this.height,
+                    x,
+                    y,
+                    random(0, 260),
+                    random(30, 110)))
+
+                this.counter = -1
+            }
+
+            update(delta) {
+                ctx.globalCompositeOperation = 'hard-light'
+                ctx.fillStyle = `rgba(20,20,20,${ 7 * delta })`
+                ctx.fillRect(0, 0, this.width, this.height)
+
+                ctx.globalCompositeOperation = 'lighter'
+                for (let firework of this.fireworks) firework.update(delta)
+
+                // if enough time passed... create new new firework
+                this.counter += delta * 3 // each second
+                if (this.counter >= 1) {
+                    this.fireworks.push(new Firework(
+                        random(this.spawnA, this.spawnB),
+                        this.height,
+                        random(0, this.width),
+                        random(this.spawnC, this.spawnD),
+                        random(0, 360),
+                        random(30, 110)))
+                    this.counter = 0
+                }
+
+                // remove the dead fireworks
+                if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(firework => !firework.dead)
             }
         }
 
+        class Firework {
+            constructor(x, y, targetX, targetY, shade, offsprings) {
+                this.dead = false
+                this.offsprings = offsprings
+
+                this.x = x
+                this.y = y
+                this.targetX = targetX
+                this.targetY = targetY
+
+                this.shade = shade
+                this.history = []
+            }
+            update(delta) {
+                if (this.dead) return
+
+                let xDiff = this.targetX - this.x
+                let yDiff = this.targetY - this.y
+                if (Math.abs(xDiff) > 3 || Math.abs(yDiff) > 3) { // is still moving
+                    this.x += xDiff * 2 * delta
+                    this.y += yDiff * 2 * delta
+
+                    this.history.push({
+                        x: this.x,
+                        y: this.y
+                    })
+
+                    if (this.history.length > 20) this.history.shift()
+
+                } else {
+                    if (this.offsprings && !this.madeChilds) {
+
+                        let babies = this.offsprings / 2
+                        for (let i = 0; i < babies; i++) {
+                            let targetX = this.x + this.offsprings * Math.cos(PI2 * i / babies) | 0
+                            let targetY = this.y + this.offsprings * Math.sin(PI2 * i / babies) | 0
+
+                            birthday.fireworks.push(new Firework(this.x, this.y, targetX, targetY, this.shade, 0))
+                        }
+                    }
+                    this.madeChilds = true
+                    this.history.shift()
+                }
+
+                if (this.history.length === 0) this.dead = true
+                else if (this.offsprings) {
+                    for (let i = 0; this.history.length > i; i++) {
+                        let point = this.history[i]
+                        ctx.beginPath()
+                        ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)'
+                        ctx.arc(point.x, point.y, 1, 0, PI2, false)
+                        ctx.fill()
+                    }
+                } else {
+                    ctx.beginPath()
+                    ctx.fillStyle = 'hsl(' + this.shade + ',100%,50%)'
+                    ctx.arc(this.x, this.y, 1, 0, PI2, false)
+                    ctx.fill()
+                }
+            }
+        }
+
+        let canvas = document.getElementById('birthday')
+        let ctx = canvas.getContext('2d')
+
+        let then = timestamp()
+
+        let birthday = new Birthday
+        window.onresize = () => birthday.resize()
+        document.onclick = evt => birthday.onClick(evt)
+        document.ontouchstart = evt => birthday.onClick(evt)
+
+        ;(function loop() {
+            requestAnimationFrame(loop)
+
+            let now = timestamp()
+            let delta = now - then
+
+            then = now
+            birthday.update(delta / 1000)
+        })()
+
+        // Messages management
         const messages = [
             "Joyeux anniversaire mon frère ! 🎉",
             "Que cette journée soit aussi géniale que toi ! 😄",
-            "Fier d'avoir un frère comme toi ❤️",
-            "Bonheur, Santé et de la réussite cette année 🙌",
-            "Profite de ta journée, tu le mérites ! 🎂",
+            "Tellement fier d'avoir un frère comme toi ❤️",
+            "Que du bonheur, de la santé et de la réussite pour toi cette année 🙌",
+            "Profite à fond de ta journée, tu le mérites ! 🎂",
             "Un frère comme toi, c'est un vrai cadeau de la vie 🎁",
             "Plein de moments magiques et de souvenirs heureux à venir ✨",
             "Je te souhaite tout ce qu'il y a de meilleur dans la vie 🌟",
             "Merci d'être toujours là, tu es un frère en or 💛",
+            "On ne choisit pas sa famille, mais j'ai eu la chance de tomber sur toi 🔥"
         ];
 
         let currentMessageIndex = 0;
@@ -289,19 +480,36 @@
         function showMessage() {
             const randomMessage = messages[Math.floor(Math.random() * messages.length)];
             document.getElementById('codeMessage').textContent = randomMessage;
-            createConfetti();
+            // Créer un feu d'artifice au lieu des confettis
+            createFirework();
+        }
+
+        function createFirework() {
+            let count = random(5, 8);
+            for (let i = 0; i < count; i++) {
+                birthday.fireworks.push(new Firework(
+                    random(birthday.spawnA, birthday.spawnB),
+                    birthday.height,
+                    random(0, birthday.width),
+                    random(birthday.spawnC, birthday.spawnD),
+                    random(0, 360),
+                    random(30, 110)
+                ));
+            }
         }
 
         function changeMessageAutomatically() {
             document.getElementById('codeMessage').textContent = messages[currentMessageIndex];
             currentMessageIndex = (currentMessageIndex + 1) % messages.length;
- 
-            if (Math.random() < 0.3) {
-                createConfetti();
+
+            // Créer des feux d'artifice de temps en temps
+            if (Math.random() < 0.4) {
+                createFirework();
             }
         }
 
         function startAutoChange() {
+            // Changer le message toutes les 4 secondes
             autoChangeInterval = setInterval(changeMessageAutomatically, 4000);
         }
 
@@ -310,17 +518,21 @@
                 clearInterval(autoChangeInterval);
             }
         }
+
+        // Démarrer le changement automatique après le chargement
         window.addEventListener('load', () => {
             setTimeout(() => {
-                createConfetti();
+                createFirework();
                 startAutoChange();
-            }, 2000); 
+            }, 3000); // Attendre 3 secondes après le chargement
         });
 
+        // Arrêter le changement automatique quand on clique sur le bouton
         document.querySelector('.button').addEventListener('click', () => {
             stopAutoChange();
             showMessage();
-            setTimeout(startAutoChange, 5000);
+            // Redémarrer le changement automatique après 10 secondes
+            setTimeout(startAutoChange, 10000);
         });
     </script>
 </body>
