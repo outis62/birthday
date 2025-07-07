@@ -201,7 +201,7 @@
         }
 
         .button {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #10ddcc, #0fb6ab);
             color: white;
             border: none;
             padding: 15px 30px;
@@ -217,6 +217,13 @@
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
+        .name {
+    color: #ff6b6b; 
+    font-weight: bold;
+    font-size: 2rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
 
         @media (max-width: 768px) {
             .birthday-text {
@@ -242,9 +249,9 @@
     <div class="container">
         <div class="birthday-text">🎉 HAPPY BIRTHDAY ! 🎂</div>
         <div class="code-message" id="codeMessage">
-            Joyeux anniversaire, 🎈 à Daouda ZABRE
+            Joyeux anniversaire, 🎈 à <span class="name">Daouda ZABRE</span>
         </div>
-        <button class="button" onclick="showMessage()">Clique pour un message spécial !</button>
+        <button class="button" onclick="showMessage()">Clique 🎂</button>
     </div>
 
     <script>
